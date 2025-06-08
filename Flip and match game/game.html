@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Memory Match - Game</title>
+  <style>
+    html, body {
+     margin: 0;
+     padding: 0;
+     height: 100%;
+     font-family: 'Segoe UI', sans-serif;
+     background: 
+      url('bg2.jpg') no-repeat center center fixed;
+     background-size: cover;
+     color: white;
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+    }
+    .top-bar {
+      width: 100%;
+      background: #0074D9;
+      padding: 15px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      color: white;
+      font-size: 1.2rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    #game-board {
+      margin: 30px 0;
+      display: grid;
+      gap: 10px;
+      width: 50vmin;
+      height: 50vmin;
+      grid-template-columns: repeat(auto-fit, minmax(20%, 1fr));
+    }
+
+    .card {
+      background: #FFDC00;
+      color: #001f3f;
+      font-size: 2rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      perspective: 1000px;
+    }
+
+    .card.matched {
+      background: #2ecc40;
+      color: white;
+      cursor: default;
+    }
+
+    #restart-btn {
+      background: #2ecc40;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    /* WIN MODAL */
+    #win-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .speech-bubble {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      width: 80%;
+      max-width: 400px;
+      text-align: center;
+      color: #333;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      animation: popUp 0.4s ease-out;
+    }
+
+    .speech-bubble img.giraffe {
+      width: 100px;
+      margin-bottom: 15px;
+      animation: float 2s infinite ease-in-out;
+    }
+
+    @keyframes popUp {
+      from { transform: scale(0.6); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .bubble-text h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #0074D9;
+    }
+
+    .bubble-text p {
+      font-size: 1.1rem;
+      margin: 10px 0 20px;
+    }
+
+    .bubble-text button {
+      padding: 10px 20px;
+      margin: 0 10px 10px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #01FF70;
+      color: #000;
+      cursor: pointer;
+    }
+
+    .bubble-text button:hover {
+      background: #00cc5c;
+    }
+
+    @media (max-width: 600px) {
+      #game-board {
+        width: 90vmin;
+        height: 90vmin;
+        gap: 5px;
+      }
+
+      .top-bar {
+        flex-direction: column;
+        text-align: center;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <span id="level">Level 1</span>
+    <span id="score">🎯 Score: 0</span>
+    <span id="timer">⏱ 0s</span>
+  </div>
+
+  <div id="game-board"></div>
+  <button id="restart-btn">🔄 Restart</button>
+
+  <!-- Hidden by default -->
+  <div id="win-modal">
+    <div class="speech-bubble">
+      <img class="giraffe" src="girafee.gif" alt="Giraffe Character" />
+      <div class="bubble-text">
+        <h1>You Win! 🎉</h1>
+        <p>Awesome job! Let's go to the next level!</p>
+        <button onclick="nextLevel()">Next Level ⏭️</button>
+        <button onclick="restartGame()">🔁 Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const board = document.getElementById("game-board");
+    const scoreDisplay = document.getElementById("score");
+    const timerDisplay = document.getElementById("timer");
+    const levelDisplay = document.getElementById("level");
+    const winPopup = document.getElementById("win-modal");
+
+    let level = parseInt(sessionStorage.getItem("level")) || 1;
+    const levels = {
+      1: 2,  // 2x2
+      2: 4,  // 4x4
+      3: 6   // 6x6
+    };
+
+    const allEmojis = ['🐶','🐱','🐭','🦊','🐼','🦁','🐷','🐙','🐵','🐤','🐸','🦄'];
+    let flipped = [];
+    let matched = 0;
+    let score = 0;
+    let timer = 0;
+    let interval;
+    let gridSize = levels[level] || 2;
+
+    function createBoard(size) {
+      board.innerHTML = "";
+      const total = size * size;
+      const pairs = total / 2;
+      const emojis = allEmojis.slice(0, pairs);
+      const cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+
+      board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+      cards.forEach(symbol => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.textContent = "❓";
+        card.dataset.symbol = symbol;
+        card.addEventListener("click", () => flip(card));
+        board.appendChild(card);
+      });
+
+      interval = setInterval(() => {
+        timer++;
+        timerDisplay.textContent = `⏱ ${timer}s`;
+      }, 1000);
+    }
+
+    function flip(card) {
+      if (flipped.length === 2 || card.classList.contains("matched") || flipped.includes(card)) return;
+      card.textContent = card.dataset.symbol;
+      flipped.push(card);
+
+      if (flipped.length === 2) {
+        setTimeout(() => {
+          const [a, b] = flipped;
+          if (a.dataset.symbol === b.dataset.symbol) {
+            a.classList.add("matched");
+            b.classList.add("matched");
+            matched += 2;
+            score += 10;
+            scoreDisplay.textContent = `🎯 Score: ${score}`;
+            if (matched === gridSize * gridSize) showWin();
+          } else {
+            a.textContent = "❓";
+            b.textContent = "❓";
+          }
+          flipped = [];
+        }, 600);
+      }
+    }
+
+    function showWin() {
+      clearInterval(interval);
+      setTimeout(() => {
+        winPopup.style.display = "flex";
+      }, 500);
+    }
+
+    function nextLevel() {
+      level = Math.min(level + 1, 3);
+      sessionStorage.setItem("level", level);
+      location.reload();
+    }
+
+    function restartGame() {
+      sessionStorage.setItem("level", 1);
+      location.reload();
+    }
+
+    levelDisplay.textContent = `Level ${level}`;
+    createBoard(gridSize);
+  </script>
+</body>
+</html>

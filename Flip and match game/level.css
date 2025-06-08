@@ -1,0 +1,143 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', sans-serif;
+  background: url('bg3.gif') no-repeat center center / cover;
+  color: #fff;
+  overflow-x: hidden;
+  transition: background 0.6s ease, color 0.3s ease;
+}
+
+body.light {
+  background: url('bg2.gif') no-repeat center center / cover;
+  color: #111;
+}
+
+/* Top Bar */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+}
+
+.toggles button {
+  font-size: 1.3rem;
+  margin-left: 10px;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.toggles button:hover {
+  background: #00adb5;
+  color: #000;
+}
+
+/* Title */
+.page-title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-top: 30px;
+  text-shadow: 2px 2px 10px #000;
+  opacity: 0;
+  animation: fade-in 0.8s ease forwards;
+}
+
+/* Level Grid */
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  padding: 50px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* Elegant Level Buttons */
+.level-btn {
+  background: rgba(255,255,255,0.1);
+  border: 2px solid transparent;
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 16px;
+  font-size: 1.2rem;
+  text-align: center;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.3s ease;
+  opacity: 0;
+}
+
+.level-btn span {
+  display: block;
+  font-size: 0.85rem;
+  color: #ccc;
+  margin-top: 6px;
+}
+
+.level-btn:hover {
+  transform: translateY(-6px) scale(1.03);
+  border-color: #00adb5;
+  background: rgba(0, 173, 181, 0.25);
+  box-shadow: 0 0 15px #00adb5aa;
+}
+
+/* Light Mode Button Styles */
+body.light .level-btn {
+  background: rgba(255,255,255,0.7);
+  color: #111;
+  border-color: #00adb5;
+}
+
+body.light .level-btn:hover {
+  background: #00adb5;
+  color: #fff;
+}
+
+/* Back Button */
+.back-btn {
+  background: rgba(255,255,255,0.1);
+  border: 2px solid #00adb5;
+  padding: 10px 18px;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.back-btn:hover {
+  background: #00adb5;
+  color: #000;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up {
+  animation: fade-in-up 0.6s ease forwards;
+}
+
+.fade-out {
+  animation: fadeOutPage 0.6s ease forwards;
+}
+
+@keyframes fadeOutPage {
+  to {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+}

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Memory Match - Home</title>
+  <link rel="stylesheet" href="Homepage.css" />
+</head>
+<body>
+  <!-- Background Music -->
+  <audio id="bg-music" src="audio/game-intro-345507.mp3" loop></audio>
+  <audio id="click-sound" src="audio/game-start-317318.mp3"></audio>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <img id="profile-icon" src="avatars/avatar7.avif" alt="Select Profile" title="Select Profile">
+    <div id="help-icon" title="How to Play">❓</div>
+  </div>
+
+  <!-- Game Title -->
+  <h1 class="game-title">Memory Match</h1>
+
+  <!-- Profile Selection Panel -->
+  <div class="profile-panel" id="profile-panel">
+    <h2>Select Your Avatar</h2>
+    <div class="avatars">
+      <div class="avatar-card" onclick="selectProfile('avatars/avatar1.avif')">
+        <img src="avatars/avatar1.avif" alt="Avatar 1">
+      </div>
+      <div class="avatar-card" onclick="selectProfile('avatars/avatar2.avif')">
+        <img src="avatars/avatar2.avif" alt="Avatar 2">
+      </div>
+      <div class="avatar-card" onclick="selectProfile('avatars/avatar3.avif')">
+        <img src="avatars/avatar3.avif" alt="Avatar 3">
+      </div>
+      <div class="avatar-card" onclick="selectProfile('avatars/avatar4.avif')">
+        <img src="avatars/avatar4.avif" alt="Avatar 4">
+      </div>
+      <div class="avatar-card" onclick="selectProfile('avatars/avatar5.avif')">
+        <img src="avatars/avatar5.avif" alt="Avatar 5">
+      </div>
+    </div>
+    <button id="next-btn" disabled>Next</button>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="help-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>How to Play</h2>
+      <ul>
+        <li>Click the profile icon to choose your avatar.</li>
+        <li>Select one and press "Next" to confirm.</li>
+        <li>Match cards in pairs as fast as possible!</li>
+        <li>Complete levels to progress automatically.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    const bgMusic = document.getElementById('bg-music');
+    const clickSound = document.getElementById('click-sound');
+    const helpModal = document.getElementById('help-modal');
+    const helpIcon = document.getElementById('help-icon');
+    const closeBtn = helpModal.querySelector('.close-btn');
+    const profilePanel = document.getElementById('profile-panel');
+    const profileIcon = document.getElementById('profile-icon');
+    const nextBtn = document.getElementById('next-btn');
+
+    let selectedProfile = "";
+
+    // Start background music on first user interaction
+    window.addEventListener('click', () => {
+      if (bgMusic.paused) {
+        bgMusic.volume = 0.4;
+        bgMusic.play().catch(() => {});
+      }
+    }, { once: true });
+
+    // Toggle profile panel
+    profileIcon.addEventListener('click', () => {
+      profilePanel.classList.toggle('visible');
+    });
+
+    // Select profile
+    function selectProfile(src) {
+      selectedProfile = src;
+      clickSound.play();
+      document.querySelectorAll('.avatar-card').forEach(card => card.classList.remove('selected'));
+      document.querySelectorAll('.avatar-card img').forEach(img => {
+        if (img.src.includes(src)) {
+          img.parentElement.classList.add('selected');
+        }
+      });
+      nextBtn.disabled = false;
+    }
+
+    // Save selected profile and go to game page
+    nextBtn.addEventListener('click', () => {
+      if (selectedProfile) {
+        clickSound.play();
+        sessionStorage.setItem('profile', selectedProfile);
+        profileIcon.src = selectedProfile;
+        profilePanel.classList.remove('visible');
+
+        // Navigate to level.html page
+        window.location.href = 'level.html';
+      }
+    });
+
+    // Help modal
+    helpIcon.addEventListener('click', () => {
+      helpModal.style.display = "block";
+    });
+
+    closeBtn.addEventListener('click', () => {
+      helpModal.style.display = "none";
+    });
+
+    window.addEventListener('click', (e) => {
+      if (e.target === helpModal) {
+        helpModal.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
